@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CSS Injector</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: sans-serif;
+            width: 450px;
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 95%;
+            margin-bottom: 12px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 10px 18px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.delete {
+            background-color: #dc3545;
+        }
+
+        button.delete:hover {
+            background-color: #c82333;
+        }
+
+        button.edit {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        button.edit:hover {
+            background-color: #e0a800;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .config-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .config-item h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .config-item .actions button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        #configForm {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+        }
+
+        #configForm h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>CSS Injector</h1>
+
+    <div id="configurationsList">
+        <!-- Danh sách cấu hình sẽ được chèn vào đây bởi JavaScript -->
+    </div>
+
+    <button id="showAddFormButton">Thêm mới</button>
+
+    <div id="configForm" style="display:none;">
+        <input type="hidden" id="configId">
+        <label for="hostname">Hostname (ví dụ: example.com, sub.example.com):</label>
+        <input type="text" id="hostname" placeholder="example.com">
+        <label for="customCSS">CSS tùy chỉnh:</label>
+        <textarea id="customCSS" placeholder="body { background-color: lightblue !important; }"></textarea>
+        <button id="saveConfigButton">Lưu</button>
+        <button id="cancelButton" class="delete">Hủy</button>
+    </div>
+    <p id="status"></p>
+    <script src="popup.js"></script>
+</body>
+
+</html>

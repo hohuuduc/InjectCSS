@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "CSS Injector",
+  "version": "1.0.0",
+  "description": "Cho phép người dùng thêm CSS tùy chỉnh và thực thi trên các trang web được chỉ định.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
