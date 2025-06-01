@@ -22,23 +22,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderConfigurations() {
-    configurationsListDiv.innerHTML = ''; // Xóa danh sách cũ
+    configurationsListDiv.innerHTML = ''; // Clear the old list
     if (configurations.length === 0) {
-      configurationsListDiv.innerHTML = '<p>Chưa có cấu hình nào. Nhấn "Thêm Host mới" để bắt đầu.</p>';
+      configurationsListDiv.innerHTML = '<p>No configurations yet. Click "Add New" to get started.</p>';
     } else {
       configurations.forEach(config => {
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('config-item');
         itemDiv.innerHTML = `
           <div class="config-item-header">
-            <label class="switch enable-toggle" title="Bật/Tắt script này">
+            <label class="switch enable-toggle" title="Enable/Disable this script">
               <input type="checkbox" data-id="${config.id}" ${config.enabled !== false ? 'checked' : ''}>
               <span class="slider"></span>
             </label>
             <h3>${config.hostname}</h3>
             <div class="actions">
-              <button class="edit" data-id="${config.id}">Sửa</button>
-              <button class="delete" data-id="${config.id}">Xóa</button>
+              <button class="edit" data-id="${config.id}">Edit</button>
+              <button class="delete" data-id="${config.id}">Delete</button>
             </div>
           </div>
           <p class="css-preview">CSS: ${config.css.substring(0, 40)}${config.css.length > 40 ? '...' : ''}</p>
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Gắn event listeners cho các nút sửa/xóa
+    // Attach event listeners to edit/delete buttons
     document.querySelectorAll('.edit').forEach(button => {
       button.addEventListener('click', handleEdit);
     });
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       button.addEventListener('click', handleDelete);
     });
     document.querySelectorAll('.enable-toggle input[type="checkbox"]').forEach(checkbox => {
-      checkbox.addEventListener('change', handleToggleEnable); // Gắn vào input bên trong label
+      checkbox.addEventListener('change', handleToggleEnable); // Attach to the input inside the label
     });
   }
 
@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function saveConfigurations() {
     chrome.storage.local.set({ configurations }, () => {
-      displayStatus('Đã lưu tất cả cấu hình!');
-      loadConfigurations(); // Tải lại để cập nhật UI và áp dụng ngay nếu cần
+      displayStatus('All configurations saved!');
+      loadConfigurations(); // Reload to update UI and apply immediately if needed
       applyToActiveTabIfMatched();
     });
   }
@@ -77,22 +77,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function showForm(isEdit = false, config = null) {
     configFormDiv.style.display = 'block';
     showAddFormButton.style.display = 'none';
-    const currentFormTitle = document.getElementById('formTitle') || { textContent: '' }; // Để tránh lỗi nếu formTitle không tồn tại
+    const currentFormTitle = document.getElementById('formTitle') || { textContent: '' }; // To avoid errors if formTitle doesn't exist
 
     if (isEdit && config) {
-      currentFormTitle.textContent = 'Sửa cấu hình Host';
-      configIdInput.value = config.id || ''; // Hiển thị ID hiện tại, có thể rỗng nếu ID gốc không hợp lệ
+      currentFormTitle.textContent = 'Edit Host Configuration';
+      configIdInput.value = config.id || ''; // Display current ID, can be empty if the original ID is invalid
       hostnameInput.value = config.hostname;
       customCSSInput.value = config.css;
-      // Lưu trữ ID gốc của mục đang được sửa, dùng để xác định ngữ cảnh "sửa" khi lưu
-      // ngay cả khi config.id hiện tại là falsy.
+      // Store the original ID of the item being edited, used to determine the "edit" context on save
+      // even if the current config.id is falsy.
       configFormDiv.dataset.editingOriginalId = config.id;
     } else {
-      currentFormTitle.textContent = 'Thêm Host mới';
+      currentFormTitle.textContent = 'Add New Host';
       configIdInput.value = '';
       hostnameInput.value = '';
       customCSSInput.value = '';
-      delete configFormDiv.dataset.editingOriginalId; // Xóa cờ ngữ cảnh sửa
+      delete configFormDiv.dataset.editingOriginalId; // Clear the edit context flag
     }
   }
 
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configIdInput.value = '';
     hostnameInput.value = '';
     customCSSInput.value = '';
-    delete configFormDiv.dataset.editingOriginalId; // Đảm bảo xóa cờ khi hủy form
+    delete configFormDiv.dataset.editingOriginalId; // Ensure the flag is cleared when the form is cancelled
   }
 
   showAddFormButton.addEventListener('click', () => {
@@ -117,46 +117,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const hostname = hostnameInput.value.trim();
     const css = customCSSInput.value;
 
-    // Lấy ID gốc đã lưu khi form sửa được mở
+    // Get the original ID saved when the edit form was opened
     const originalIdForEdit = configFormDiv.dataset.editingOriginalId;
-    // Xác định xem chúng ta có đang trong ngữ cảnh sửa hay không
+    // Determine if we are in an edit context
     const isInEditContext = typeof originalIdForEdit !== 'undefined';
 
     if (!hostname) {
-      displayStatus('Hostname không được để trống.', true);
+      displayStatus('Hostname cannot be empty.', true);
       return;
     }
 
     if (isInEditContext) {
-      // Đang trong ngữ cảnh sửa, cố gắng tìm mục bằng ID gốc của nó
+      // In edit context, try to find the item by its original ID
       const index = configurations.findIndex(c => c.id === originalIdForEdit);
 
       if (index !== -1) {
-        // Tìm thấy mục gốc. Cập nhật nó.
-        // Đảm bảo mục được cập nhật có ID hợp lệ; tạo ID mới nếu ID gốc không hợp lệ.
+        // Original item found. Update it.
+        // Ensure the updated item has a valid ID; create a new ID if the original ID is invalid.
         const currentItem = configurations[index];
-        const newItemId = currentItem.id || generateId(); // Sử dụng ID hiện tại nếu hợp lệ, nếu không thì tạo mới
+        const newItemId = currentItem.id || generateId(); // Use the current ID if valid, otherwise create a new one
 
         if (!currentItem.id) {
-          displayStatus('Đã sửa mục và tạo ID mới do ID cũ không hợp lệ.', false);
+          displayStatus('Item updated and new ID created due to invalid old ID.', false);
         }
 
         configurations[index] = {
-          ...currentItem, // Giữ lại các thuộc tính khác nếu có
+          ...currentItem, // Keep other properties if any
           id: newItemId,
           hostname: hostname,
           css: css
         };
       } else {
-        // Không tìm thấy mục gốc (dựa trên originalIdForEdit).
-        // Đây là trường hợp bất thường. Có thể mục đã bị xóa.
-        // Fallback: thêm như một mục mới để không làm mất dữ liệu người dùng nhập.
-        displayStatus('Lỗi: Không tìm thấy mục gốc để sửa. Đã thêm như một mục mới.', true);
+        // Original item not found (based on originalIdForEdit).
+        // This is an unusual case. The item might have been deleted.
+        // Fallback: add as a new item to avoid losing user input.
+        displayStatus('Error: Original item not found for editing. Added as a new item.', true);
         configurations.push({ id: generateId(), hostname, css, enabled: true });
       }
     } else { // Chế độ thêm mới
-      // Không ở trong ngữ cảnh sửa, tiến hành thêm mục mới.
-      // Mặc định khi thêm mới là enabled
+      // Not in edit context, proceed to add a new item.
+      // Default when adding a new item is enabled
       configurations.push({ id: generateId(), hostname, css, enabled: true });
     }
     saveConfigurations();
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleDelete(event) {
     const id = event.target.dataset.id;
-    if (confirm('Bạn có chắc chắn muốn xóa cấu hình này?')) {
+    if (confirm('Are you sure you want to delete this configuration?')) {
       configurations = configurations.filter(c => c.id !== id);
       saveConfigurations();
     }
@@ -185,17 +185,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const configIndex = configurations.findIndex(c => c.id === id);
     if (configIndex !== -1) {
       configurations[configIndex].enabled = isEnabled;
-      saveConfigurations(); // Lưu thay đổi và áp dụng lại
+      saveConfigurations(); // Save changes and reapply
     }
   }
 
   function applyToActiveTabIfMatched() {
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => { // Thêm async ở đây
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => { // Add async here
       if (tabs[0] && tabs[0].url && tabs[0].id) {
         const activeTabId = tabs[0].id;
         try {
-          const currentTabUrl = new URL(tabs[0].url);
-          for (const config of configurations) { // Sử dụng for...of để await hoạt động đúng trong vòng lặp
+          const currentTabUrl = new URL(tabs[0].url); // Use for...of for await to work correctly in the loop
+          for (const config of configurations) { 
             if (currentTabUrl.hostname.includes(config.hostname) && config.css) {
               if (config.enabled !== false) {
                 await chrome.scripting.insertCSS({
@@ -204,17 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
               }
               else {
-                await chrome.scripting.removeCSS({ target: { tabId: activeTabId }, css: config.css }).catch(e => console.warn("Lỗi khi xóa CSS cũ:", e));
+                await chrome.scripting.removeCSS({ target: { tabId: activeTabId }, css: config.css }).catch(e => console.warn("Error removing old CSS:", e));
               }
             }
           }
         } catch (e) {
-          console.error("Lỗi xử lý URL tab hiện tại:", e);
+          console.error("Error processing current tab URL:", e);
         }
       }
     });
   }
 
-  // Tải cấu hình khi popup mở
+  // Load configurations when the popup opens
   loadConfigurations();
 });

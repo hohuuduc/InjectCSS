@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CSS Injector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cho phép người dùng thêm CSS tùy chỉnh và thực thi trên các trang web được chỉ định.",
   "permissions": [
     "storage",
