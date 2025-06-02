@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveConfigButton = document.getElementById('saveConfigButton');
   const cancelButton = document.getElementById('cancelButton');
   const statusElement = document.getElementById('status');
+  const getCurrentHostButton = document.getElementById('getCurrentHostButton');
 
   let configurations = [];
 
@@ -113,6 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
     hideForm();
   });
 
+  getCurrentHostButton.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].url) {
+        try {
+          const url = new URL(tabs[0].url);
+          if (url.hostname) {
+            hostnameInput.value = url.hostname;
+          } else {
+            displayStatus('Cannot get hostname from the current tab (e.g., new tab page).', true);
+          }
+        } catch (e) {
+          displayStatus('Invalid URL in current tab.', true);
+        }
+      } else {
+        displayStatus('No active tab found or tab has no URL.', true);
+      }
+    });
+  });
   saveConfigButton.addEventListener('click', () => {
     const hostname = hostnameInput.value.trim();
     const css = customCSSInput.value;

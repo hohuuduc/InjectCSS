@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CSS Injector",
   "version": "1.0.1",
-  "description": "Allows users to add custom CSS and apply it to specified websites.",
+  "description": "Cho phép người dùng thêm CSS tùy chỉnh và thực thi trên các trang web được chỉ định.",
   "permissions": [
     "storage",
     "scripting",
@@ -12,9 +12,9 @@
     "*://*/*"
   ],
   "action": {
-    "default_popup": "popup.min.html"
+    "default_popup": "popup.html"
   },
   "background": {
-    "service_worker": "background.min.js"
+    "service_worker": "background.js"
   }
 }
